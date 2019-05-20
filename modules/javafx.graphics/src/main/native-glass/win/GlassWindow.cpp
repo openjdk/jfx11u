@@ -538,6 +538,9 @@ LRESULT GlassWindow::WindowProc(UINT msg, WPARAM wParam, LPARAM lParam)
         case WM_CAPTURECHANGED:
             ViewContainer::NotifyCaptureChanged(GetHWND(), (HWND)lParam);
             break;
+        case WM_MENUCHAR:
+            // Stop the beep when missing mnemonic or accelerator key JDK-8089986
+            return MNC_CLOSE << 16;
         case WM_SYSKEYDOWN:
         case WM_SYSKEYUP:
         case WM_KEYDOWN:
