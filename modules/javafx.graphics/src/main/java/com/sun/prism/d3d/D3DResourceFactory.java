@@ -112,6 +112,9 @@ class D3DResourceFactory extends BaseShaderFactory {
 
     @Override
     public boolean isDeviceReady() {
+        if (isDisposed()) {
+            return false;
+        }
         displayPrismStatistics();
         return context.testLostStateAndReset();
     }
@@ -141,6 +144,9 @@ class D3DResourceFactory extends BaseShaderFactory {
     @Override
     public D3DTexture createTexture(PixelFormat format, Usage usagehint,
             WrapMode wrapMode, int w, int h, boolean useMipmap) {
+
+        if (checkDisposed()) return null;
+
         if (!isFormatSupported(format)) {
             throw new UnsupportedOperationException(
                 "Pixel format " + format +
@@ -181,6 +187,8 @@ class D3DResourceFactory extends BaseShaderFactory {
 
     @Override
     public Texture createTexture(MediaFrame frame) {
+        if (checkDisposed()) return null;
+
         frame.holdFrame();
 
         int width = frame.getWidth();
@@ -272,6 +280,8 @@ class D3DResourceFactory extends BaseShaderFactory {
 
     @Override
     public D3DRTTexture createRTTexture(int width, int height, WrapMode wrapMode, boolean msaa) {
+        if (checkDisposed()) return null;
+
         if (PrismSettings.verbose && context.isLost()) {
             System.err.println("RT Texture allocation while the device is lost");
         }
@@ -318,6 +328,8 @@ class D3DResourceFactory extends BaseShaderFactory {
     }
 
     public Presentable createPresentable(PresentableState pState) {
+        if (checkDisposed()) return null;
+
         if (PrismSettings.verbose && context.isLost()) {
             System.err.println("SwapChain allocation while the device is lost");
         }
@@ -386,6 +398,8 @@ class D3DResourceFactory extends BaseShaderFactory {
                                boolean isPixcoordUsed,
                                boolean isPerVertexColorUsed)
     {
+        if (checkDisposed()) return null;
+
         long shaderHandle = D3DShader.init(
                 context.getContextHandle(), getBuffer(pixelShaderCode),
                 maxTexCoordIndex, isPixcoordUsed, isPerVertexColorUsed);
@@ -410,11 +424,6 @@ class D3DResourceFactory extends BaseShaderFactory {
             e.printStackTrace();
             throw new InternalError("Error loading stock shader " + name);
         }
-    }
-
-    @Override
-    public void dispose() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -453,13 +462,16 @@ class D3DResourceFactory extends BaseShaderFactory {
     }
 
     @Override
-    protected void notifyReleased() {
+    public void dispose() {
+        context.dispose();
+
         for (ListIterator<D3DRecord> it = records.listIterator(); it.hasNext();) {
             D3DRecord r = it.next();
             r.markDisposed();
         }
         records.clear();
-        super.notifyReleased();
+
+        super.dispose();
     }
 
     void addRecord(D3DRecord record) {
@@ -471,15 +483,18 @@ class D3DResourceFactory extends BaseShaderFactory {
     }
 
     public PhongMaterial createPhongMaterial() {
+        if (checkDisposed()) return null;
         return D3DPhongMaterial.create(context);
     }
 
     public MeshView createMeshView(Mesh mesh) {
+        if (checkDisposed()) return null;
         return D3DMeshView.create(context, (D3DMesh) mesh);
 
     }
 
     public Mesh createMesh() {
+        if (checkDisposed()) return null;
         return D3DMesh.create(context);
     }
 
