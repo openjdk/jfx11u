@@ -343,7 +343,7 @@ public final class Platform {
      * @throws IllegalStateException if this method is called on a thread
      * other than the JavaFX Application Thread
      *
-     * @since 17
+     * @since 11.0.12
      */
     public static Optional<Boolean> isKeyLocked(KeyCode keyCode) {
         Toolkit.getToolkit().checkFxUserThread();
