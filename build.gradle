@@ -346,6 +346,9 @@ defineProperty("javaBuildNumber", javaVersionInfo[1])
 
 defineProperty("libAVRepositoryURL", "https://libav.org/releases/")
 defineProperty("FFmpegRepositoryURL", "https://www.ffmpeg.org/releases/")
+defineProperty("icuRepositoryURL", "https://github.com/unicode-org/icu/releases/")
+
+defineProperty("icuVersion", "68.2")
 
 loadProperties("$projectDir/build.properties")
 
@@ -1764,7 +1767,10 @@ allprojects {
         repositories {
             ivy {
                 url JFX_DEPS_URL
-                layout "pattern", {
+                metadataSources {
+                    artifact()
+                }
+                patternLayout {
                     artifact "[artifact]-[revision](-[classifier]).[ext]"
                     artifact "[artifact].[ext]"
                 }
@@ -1777,7 +1783,10 @@ allprojects {
             mavenCentral()
             ivy {
                 url "https://download.eclipse.org/eclipse/updates/4.6/R-4.6.3-201703010400/plugins/"
-                layout "pattern", {
+                metadataSources {
+                    artifact()
+                }
+                patternLayout {
                     artifact "[artifact].[ext]"
                 }
             }
@@ -1788,14 +1797,35 @@ allprojects {
         repositories {
             ivy {
                 url libAVRepositoryURL
-                layout "pattern", {
+                metadataSources {
+                    artifact()
+                }
+                patternLayout {
                     artifact "[artifact].[ext]"
                 }
             }
             ivy {
                 url FFmpegRepositoryURL
-                layout "pattern", {
+                metadataSources {
+                    artifact()
+                }
+                patternLayout {
                     artifact "[artifact].[ext]"
+                }
+            }
+        }
+    }
+
+    if (JFX_DEPS_URL == "" && IS_COMPILE_WEBKIT) {
+        def icuReleaseVersion = icuVersion.replaceAll('\\.', '-')
+        repositories {
+            ivy {
+                url icuRepositoryURL
+                metadataSources {
+                    artifact()
+                }
+                patternLayout {
+                    artifact "download/release-$icuReleaseVersion/[artifact].[ext]"
                 }
             }
         }
@@ -3819,6 +3849,8 @@ project(":web") {
     project.ext.moduleRuntime = true
     project.ext.moduleName = "javafx.web"
 
+    getConfigurations().create("icu");
+
     sourceSets {
         main
         shims
@@ -3831,6 +3863,9 @@ project(":web") {
     commonModuleSetup(project, [ 'base', 'graphics', 'controls', 'media', 'web' ])
 
     dependencies {
+        if (IS_COMPILE_WEBKIT) {
+            icu name: "icu4c-${icuVersion}-data-bin-l", ext: "zip"
+        }
     }
 
     compileJava.dependsOn updateCacheIfNeeded
@@ -3903,7 +3938,14 @@ project(":web") {
         File nativeBuildDir = new File("${webkitOutputDir}")
         nativeBuildDir.mkdirs()
 
-        def compileNativeTask = task("compileNative${t.capital}", dependsOn: [compileJava]) {
+        def getICUFile = task("copyICUFile", type: Copy) {
+            enabled = IS_COMPILE_WEBKIT
+
+            from configurations.icu.files
+            into "$webkitOutputDir/$webkitConfig/icu/data"
+        }
+
+        def compileNativeTask = task("compileNative${t.capital}", dependsOn: [compileJava, getICUFile]) {
             println "Building Webkit configuration /$webkitConfig/ into $webkitOutputDir"
             enabled =  (IS_COMPILE_WEBKIT)
 
@@ -4304,6 +4346,7 @@ allprojects {
         project.jar.enabled = false
 
         // and redirect the resources into the module
+        project.sourceSets.main.output.resourcesDir = project.moduleDir
         project.processResources.destinationDir = project.moduleDir
     }
 
@@ -4337,6 +4380,7 @@ allprojects {
         project.sourceSets.shims.resources.srcDirs += project.sourceSets.main.resources.srcDirs
 
         // and redirect the resources into the module
+        project.sourceSets.shims.output.resourcesDir = project.moduleShimsDir
         project.processShimsResources.destinationDir = project.moduleShimsDir
 
        compileTestJava.dependsOn(copyGeneratedShimsTask)

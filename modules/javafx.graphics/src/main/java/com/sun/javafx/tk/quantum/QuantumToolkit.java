@@ -73,6 +73,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+import java.util.Optional;
 import com.sun.glass.ui.Application;
 import com.sun.glass.ui.Clipboard;
 import com.sun.glass.ui.ClipboardAssistance;
@@ -1192,6 +1193,24 @@ public final class QuantumToolkit extends Toolkit {
         return  GraphicsPipeline.getPipeline().isMSAASupported();
     }
 
+    // Returns the glass keycode for the given JavaFX KeyCode.
+    // This method only converts lock state KeyCode values
+    private int toGlassKeyCode(KeyCode keyCode) {
+        switch (keyCode) {
+            case CAPS:
+                return com.sun.glass.events.KeyEvent.VK_CAPS_LOCK;
+            case NUM_LOCK:
+                return com.sun.glass.events.KeyEvent.VK_NUM_LOCK;
+            default:
+                return com.sun.glass.events.KeyEvent.VK_UNDEFINED;
+        }
+    }
+
+    @Override
+    public Optional<Boolean> isKeyLocked(KeyCode keyCode) {
+        return Application.GetApplication().isKeyLocked(toGlassKeyCode(keyCode));
+    }
+
     static TransferMode clipboardActionToTransferMode(final int action) {
         switch (action) {
             case Clipboard.ACTION_NONE:
@@ -1340,8 +1359,17 @@ public final class QuantumToolkit extends Toolkit {
         public double getHeight() { return image.getHeight(); }
         @Override
         public void factoryReset() { dispose(); }
+
         @Override
-        public void factoryReleased() { dispose(); }
+        public void factoryReleased() {
+            dispose();
+
+            // ResourceFactory is being disposed; clear reference to avoid leak
+            if (rf != null) {
+                rf.removeFactoryListener(this);
+                rf = null;
+            }
+        }
     }
 
     @Override public ImageLoader loadPlatformImage(Object platformImage) {

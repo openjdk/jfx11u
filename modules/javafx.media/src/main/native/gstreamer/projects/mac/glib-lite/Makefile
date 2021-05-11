@@ -55,7 +55,8 @@ LDFLAGS += -Wl,-install_name,@rpath/$(TARGET_NAME) \
            -liconv \
            -L$(BUILD_DIR) -lffi
 
-C_SOURCES = glib/garray.c \
+C_SOURCES = glib/garcbox.c \
+            glib/garray.c \
             glib/gasyncqueue.c \
             glib/gatomic.c \
             glib/gbacktrace.c \
@@ -122,7 +123,7 @@ C_SOURCES = glib/garray.c \
             glib/gunibreak.c \
             glib/gunidecomp.c \
             glib/guniprop.c \
-            glib/gurifuncs.c \
+            glib/guri.c \
             glib/gutf8.c \
             glib/gutils.c \
             glib/ghostutils.c \

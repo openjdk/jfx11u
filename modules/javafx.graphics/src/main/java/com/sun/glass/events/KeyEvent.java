@@ -67,6 +67,13 @@ public class KeyEvent {
     @Native public final static int MODIFIER_BUTTON_MIDDLE     = 1 << 7;
 
     /*
+     * Key lock state
+     */
+    @Native public static final int KEY_LOCK_OFF = 0;
+    @Native public static final int KEY_LOCK_ON = 1;
+    @Native public static final int KEY_LOCK_UNKNOWN = -1;
+
+    /*
      * Key event key codes.
      */
     @Native public final static int VK_UNDEFINED      = 0x0;

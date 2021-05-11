@@ -579,6 +579,11 @@ public abstract class Node implements EventTarget, Styleable {
             }
 
             @Override
+            public void recalculateRelativeSizeProperties(Node node, Font fontForRelativeSizes) {
+                node.recalculateRelativeSizeProperties(fontForRelativeSizes);
+            }
+
+            @Override
             public boolean isTreeVisible(Node node) {
                 return node.isTreeVisible();
             }
@@ -9400,6 +9405,12 @@ public abstract class Node implements EventTarget, Styleable {
             } else {
                 _parent = null;
             }
+        }
+    }
+
+    final void recalculateRelativeSizeProperties(Font fontForRelativeSizes) {
+        if (styleHelper != null) {
+            styleHelper.recalculateRelativeSizeProperties(this, fontForRelativeSizes);
         }
     }
 
