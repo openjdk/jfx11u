@@ -387,7 +387,7 @@ xsltNumberFormatTokenize(const xmlChar *format,
         } else {
                 tokens->tokens[tokens->nTokens].token = '0';
                 tokens->tokens[tokens->nTokens].width = 1;
-        }
+            }
     } else if ( (val == 'A') ||
             (val == 'a') ||
             (val == 'I') ||
