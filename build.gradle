@@ -2755,9 +2755,9 @@ project(":fxpackager") {
     }
 
     dependencies {
-        antpluginCompile group: "org.apache.ant", name: "ant", version: "1.8.2"
+        implementation group: "org.apache.ant", name: "ant", version: "1.8.2"
 
-        testCompile project(":controls"),
+        testImplementation project(":controls"),
             group: "org.apache.ant", name: "ant", version: "1.8.2",
             sourceSets.antplugin.output
     }
