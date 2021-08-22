@@ -2755,7 +2755,7 @@ project(":fxpackager") {
     }
 
     dependencies {
-        implementation group: "org.apache.ant", name: "ant", version: "1.8.2"
+        antpluginImplementation group: "org.apache.ant", name: "ant", version: "1.8.2"
 
         testImplementation project(":controls"),
             group: "org.apache.ant", name: "ant", version: "1.8.2",
