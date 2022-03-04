@@ -66,7 +66,6 @@ public class NativeLibLoader {
 
     private static boolean verbose = false;
 
-    private static boolean usingModules = false;
     private static File libDir = null;
     private static String libPrefix = "";
     private static String libSuffix = "";
@@ -111,16 +110,29 @@ public class NativeLibLoader {
     }
 
     private static void loadLibraryInternal(String libraryName, List<String> dependencies, Class caller) {
-        // Look for the library in the same directory as the jar file
-        // containing this class.
-        // If that fails, then try System.loadLibrary.
+        // The search order for native library loading is:
+        // - try to load the native library from either ${java.home}
+        //   (for jlinked javafx modules) or from the same folder as
+        //   this jar (if using modular jars)
+        // - if the native library comes bundled as a resource it is extracted
+        //   and loaded
+        // - the java.library.path is searched for the library in definition
+        //   order
+        // - the library is loaded via System#loadLibrary
+        // - on iOS native library is staticly linked and detected from the
+        //   existence of a JNI_OnLoad_libraryname funtion
         try {
             // FIXME: JIGSAW -- We should eventually remove this legacy path,
             // since it isn't applicable to Jigsaw.
             loadLibraryFullPath(libraryName);
         } catch (UnsatisfiedLinkError ex) {
-            if (verbose && !usingModules) {
+            if (verbose) {
                 System.err.println("WARNING: " + ex);
+            }
+
+            // if the library is available in the jar, copy it to cache and load it from there
+            if (loadLibraryFromResource(libraryName, dependencies, caller)) {
+                return;
             }
 
             // NOTE: First attempt to load the libraries from the java.library.path.
@@ -153,10 +165,6 @@ public class NativeLibLoader {
                             + libraryName + ") succeeded");
                 }
             } catch (UnsatisfiedLinkError ex2) {
-                // if the library is available in the jar, copy it to cache and load it from there
-                if (loadLibraryFromResource(libraryName, dependencies, caller)) {
-                    return;
-                }
                 //On iOS we link all libraries staticaly. Presence of library
                 //is recognized by existence of JNI_OnLoad_libraryname() C function.
                 //If libraryname contains hyphen, it needs to be translated
@@ -314,15 +322,57 @@ public class NativeLibLoader {
     }
 
 
+    private static File libDirForJRT() {
+        String javaHome = System.getProperty("java.home");
+
+        if (javaHome == null || javaHome.isEmpty()) {
+            throw new UnsatisfiedLinkError("Cannot find java.home");
+        }
+
+        // Set the native directory based on the OS
+        String osName = System.getProperty("os.name");
+        String relativeDir = null;
+        if (osName.startsWith("Windows")) {
+            relativeDir = "bin/javafx";
+        } else if (osName.startsWith("Mac")) {
+            relativeDir = "lib";
+        } else if (osName.startsWith("Linux")) {
+            relativeDir = "lib";
+        }
+
+        // Location of native libraries relative to java.home
+        return new File(javaHome + "/" + relativeDir);
+    }
+
+    private static File libDirForJarFile(String classUrlString) throws Exception {
+        // Strip out the "jar:" and everything after and including the "!"
+        String tmpStr = classUrlString.substring(4, classUrlString.lastIndexOf('!'));
+        // Strip everything after the last "/" or "\" to get rid of the jar filename
+        int lastIndexOfSlash = Math.max(tmpStr.lastIndexOf('/'), tmpStr.lastIndexOf('\\'));
+
+        // Set the native directory based on the OS
+        String osName = System.getProperty("os.name");
+        String relativeDir = null;
+        if (osName.startsWith("Windows")) {
+            relativeDir = "../bin";
+        } else if (osName.startsWith("Mac")) {
+            relativeDir = ".";
+        } else if (osName.startsWith("Linux")) {
+            relativeDir = ".";
+        }
+
+        // Location of native libraries relative to jar file
+        String libDirUrlString = tmpStr.substring(0, lastIndexOfSlash)
+                + "/" + relativeDir;
+        return new File(new URI(libDirUrlString).getPath());
+    }
+
     /**
-     * Load the native library from the same directory as the jar file
-     * containing this class.
+     * Load the native library either from the same directory as the jar file
+     * containing this class, or from the Java runtime.
      */
     private static void loadLibraryFullPath(String libraryName) {
         try {
-            if (usingModules) {
-                throw new UnsatisfiedLinkError("ignored");
-            }
             if (libDir == null) {
                 // Get the URL for this class, if it is a jar URL, then get the
                 // filename associated with it.
@@ -330,35 +380,15 @@ public class NativeLibLoader {
                 Class theClass = NativeLibLoader.class;
                 String classUrlString = theClass.getResource(theClassFile).toString();
                 if (classUrlString.startsWith("jrt:")) {
-                    // Suppress warning messages
-                    usingModules = true;
-                    throw new UnsatisfiedLinkError("ignored");
-                }
-                if (!classUrlString.startsWith("jar:file:") || classUrlString.indexOf('!') == -1) {
+                    libDir = libDirForJRT();
+                } else if (classUrlString.startsWith("jar:file:") && classUrlString.indexOf('!') > 0) {
+                    libDir = libDirForJarFile(classUrlString);
+                } else {
                     throw new UnsatisfiedLinkError("Invalid URL for class: " + classUrlString);
                 }
-                // Strip out the "jar:" and everything after and including the "!"
-                String tmpStr = classUrlString.substring(4, classUrlString.lastIndexOf('!'));
-                // Strip everything after the last "/" or "\" to get rid of the jar filename
-                int lastIndexOfSlash = Math.max(tmpStr.lastIndexOf('/'), tmpStr.lastIndexOf('\\'));
-
-                // Set the native directory based on the OS
-                String osName = System.getProperty("os.name");
-                String relativeDir = null;
-                if (osName.startsWith("Windows")) {
-                    relativeDir = "../bin";
-                } else if (osName.startsWith("Mac")) {
-                    relativeDir = ".";
-                } else if (osName.startsWith("Linux")) {
-                    relativeDir = ".";
-                }
-
-                // Location of native libraries relative to jar file
-                String libDirUrlString = tmpStr.substring(0, lastIndexOfSlash)
-                        + "/" + relativeDir;
-                libDir = new File(new URI(libDirUrlString).getPath());
 
                 // Set the lib prefix and suffix based on the OS
+                String osName = System.getProperty("os.name");
                 if (osName.startsWith("Windows")) {
                     libPrefix = "";
                     libSuffix = ".dll";
