@@ -30,6 +30,8 @@ CFLAGS = -fPIC                   \
          -DLINUX                 \
          -DGST_DISABLE_LOADSAVE  \
          -DGSTREAMER_LITE \
+         -DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_48 \
+         -DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_2_48 \
          -ffunction-sections -fdata-sections
 
 ifeq ($(BUILD_TYPE), Release)
