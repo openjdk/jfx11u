@@ -292,6 +292,7 @@ ext.MODULESOURCEPATH = "modulesourcepath.args"
 ext.OS_NAME = System.getProperty("os.name").toLowerCase()
 ext.OS_ARCH = System.getProperty("os.arch")
 ext.IS_64 = OS_ARCH.toLowerCase().contains("64")
+ext.IS_AARCH64 = OS_ARCH.toLowerCase().contains("aarch64")
 ext.IS_MAC = OS_NAME.contains("mac") || OS_NAME.contains("darwin")
 ext.IS_WINDOWS = OS_NAME.contains("windows")
 ext.IS_LINUX = OS_NAME.contains("linux")
@@ -421,7 +422,9 @@ if (IS_STATIC_BUILD && IS_COMPILE_MEDIA) {
 }
 
 // By default, target architecture = host architecture, but we allow different ones.
-defineProperty("TARGET_ARCH", OS_ARCH)
+// On Apple Silicon, default architecture must be "arm64", because clang does not accept
+// aarch64 as -arch parameter.
+defineProperty("TARGET_ARCH", (IS_MAC && IS_AARCH64) ? "arm64" : OS_ARCH)
 
 // BUILD_TOOLS_DOWNLOAD_SCRIPT specifies a path of a gradle script which downloads
 // required build tools.
@@ -1854,7 +1857,18 @@ allprojects {
     // By default all of our projects require junit for testing so we can just
     // setup this dependency here.
     dependencies {
-        testImplementation group: "junit", name: "junit", version: "4.8.2"
+        testImplementation group: "junit", name: "junit", version: "4.13.2"
+        testImplementation group: "org.hamcrest", name: "hamcrest-core", version: "1.3"
+        testImplementation group: "org.junit.jupiter", name: "junit-jupiter", version: "5.8.1"
+        testImplementation group: "org.junit.jupiter", name: "junit-jupiter-api", version: "5.8.1"
+        testImplementation group: "org.opentest4j", name: "opentest4j", version: "1.2.0"
+        testRuntimeOnly group: "org.apiguardian", name: "apiguardian-api", version: "1.1.2"
+        testRuntimeOnly group: "org.junit.jupiter", name: "junit-jupiter-engine", version: "5.8.1"
+        testRuntimeOnly group: "org.junit.jupiter", name: "junit-jupiter-params", version: "5.8.1"
+        testRuntimeOnly group: "org.junit.platform", name: "junit-platform-commons", version: "1.8.1"
+        testRuntimeOnly group: "org.junit.platform", name: "junit-platform-engine", version: "1.8.1"
+        testRuntimeOnly group: "org.junit.vintage", name: "junit-vintage-engine", version: "5.8.1"
+
         if (BUILD_CLOSED && DO_JCOV)  {
             testImplementation name: "jcov"
         }
@@ -1869,6 +1883,8 @@ allprojects {
     // Java 7 but when we switch to 8 this will be needed, and probably again when
     // we start building with Java 9.
     test {
+        useJUnitPlatform();
+
         executable = JAVA;
         enableAssertions = true;
         testLogging.exceptionFormat = "full";
@@ -1953,7 +1969,6 @@ project(":base") {
     }
 
     dependencies {
-        testImplementation group: "junit", name: "junit", version: "4.8.2"
         testImplementation sourceSets.main.output
         testImplementation sourceSets.shims.output
     }
@@ -2029,8 +2044,6 @@ project(":graphics") {
     }
 
     dependencies {
-        stubImplementation group: "junit", name: "junit", version: "4.8.2"
-
         antlr group: "org.antlr", name: "antlr4", version: "4.7.2", classifier: "complete"
         implementation project(':base')
     }
