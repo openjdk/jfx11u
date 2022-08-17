@@ -44,6 +44,7 @@ import javafx.util.Callback;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Ignore;
 
 
 public class CallbackTest extends TestBase {
@@ -161,6 +162,7 @@ public class CallbackTest extends TestBase {
         }
     }
 
+    @Ignore("JDK-8290238")
     @Test public void testCloseWindow() {
         clear();
         executeScript(JS_CLOSE);
