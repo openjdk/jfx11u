@@ -5,7 +5,7 @@ The OpenJFX 11 Updates repository is _not_ accepting new contributions. If you a
 
 Important bug fixes that have already been fixed in the mainline can be backported with prior approval. New fixes should first go into the mainline, and then can be considered for backporting. Approval from one of the project leads is required prior to creating the PR or integrating the fix.
 
-To backport a fix, import the patch from the jfx mainline into a branch of your personal fork of this repo. Then, create a [Backport Pull Request](https://wiki.openjdk.java.net/display/SKARA/Backports#Backports-BackportPullRequests), by creating the PR with the title:
+To backport a fix, import the patch from the jfx mainline into a branch of your personal fork of this repo. Then, create a [Backport Pull Request](https://wiki.openjdk.org/display/SKARA/Backports#Backports-BackportPullRequests), by creating the PR with the title:
 
 ```
 Backport LONG-COMMIT-HASH
