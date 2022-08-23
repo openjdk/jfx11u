@@ -14,5 +14,5 @@ Issue key|Summary
 [JDK-8204365] (not public)|Improve WebView processing
 [JDK-8204880] (not public)|Enhance object method calls
 [JDK-8207387] (not public)|WebView is not rendering html checkbox and radio buttons
-[JDK-8210386](https://bugs.openjdk.java.net/browse/JDK-8210386)|Clipping problems with complex affine transforms: negative scaling factors or small scaling factors
+[JDK-8210386](https://bugs.openjdk.org/browse/JDK-8210386)|Clipping problems with complex affine transforms: negative scaling factors or small scaling factors
 
