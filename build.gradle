@@ -2683,6 +2683,7 @@ project(":fxml") {
     }
 
     test {
+        systemProperty 'javafx.allowjs', 'true'
         // StubToolkit is not *really* needed here, but because some code inadvertently invokes performance
         // tracker and this attempts to fire up the toolkit and this looks for native libraries and fails,
         // we have to use the stub toolkit for now.

@@ -641,6 +641,8 @@ myText = This is the text!
 
 <p>Note the use of the language processing instruction at the beginning of the code snippet. This PI tells the FXML loader which scripting language should be used to execute the event handler. A page language must be specified whenever inline script is used in an FXML document, and can only be specified once per document. However, this does not apply to external scripts, which may be implemented using any number of supported scripting languages. Scripting is discussed in more detail in the next section.</p>
 
+<p><strong>Note:</strong> The JavaScript script engine is disabled by default. It can be enabled using a system property <span class="code">javafx.allowjs=true.</span></p>
+
 <h4><a id="controller_method_event_handlers">Controller Method Event Handlers</a></h4>
 <p>A controller method event handler is a method defined by a document's "controller". A controller is an object that is associated with the deserialized contents of an FXML document and is responsible for coordinating the behaviors of the objects (often user interface elements) defined by the document.</p>
 
@@ -793,6 +795,8 @@ The <span class="code">&lt;fx:script&gt;</span> tag allows a caller to import sc
 </pre>
 
 <p>Clicking the button triggers the event handler, which invokes the function, producing output identical to the previous examples.</p>
+
+<p><strong>Note:</strong> The JavaScript script engine is disabled by default. It can be enabled using a system property <span class="code">javafx.allowjs=true.</span></p>
 
 <p>Script code may also be defined in external files. The previous example could be split into an FXML file and a JavaScript source file with no difference in functionality:</p>
 
