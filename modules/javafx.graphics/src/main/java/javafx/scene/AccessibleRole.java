@@ -833,7 +833,7 @@ public enum AccessibleRole {
      * <li> {@link AccessibleAttribute#CHILDREN} </li>
      * </ul>
      *
-     * @since 17.0.6
+     * @since 11.0.18
      */
     DIALOG
 }
