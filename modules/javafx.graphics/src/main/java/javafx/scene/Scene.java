@@ -6462,7 +6462,13 @@ public class Scene implements EventTarget {
                             }
                             return getRoot();//not sure
                         }
-                        case ROLE: return AccessibleRole.PARENT;
+                        case ROLE: {
+                            if (getRoot() != null && getRoot().getAccessibleRole() == AccessibleRole.DIALOG) {
+                                return AccessibleRole.DIALOG;
+                            } else {
+                                return AccessibleRole.PARENT;
+                            }
+                        }
                         case SCENE: return Scene.this;
                         case FOCUS_NODE: {
                             if (transientFocusContainer != null) {
