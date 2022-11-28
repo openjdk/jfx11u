@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -53,6 +53,7 @@ import javafx.css.StyleableProperty;
 import javafx.css.StyleableStringProperty;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
+import javafx.scene.AccessibleRole;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.image.Image;
@@ -209,6 +210,7 @@ public class DialogPane extends Pane {
      */
     public DialogPane() {
         getStyleClass().add("dialog-pane");
+        setAccessibleRole(AccessibleRole.DIALOG);
 
         headerTextPanel = new GridPane();
         getChildren().add(headerTextPanel);

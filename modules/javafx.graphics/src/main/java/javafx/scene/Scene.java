@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -6462,7 +6462,13 @@ public class Scene implements EventTarget {
                             }
                             return getRoot();//not sure
                         }
-                        case ROLE: return AccessibleRole.PARENT;
+                        case ROLE: {
+                            if (getRoot() != null && getRoot().getAccessibleRole() == AccessibleRole.DIALOG) {
+                                return AccessibleRole.DIALOG;
+                            } else {
+                                return AccessibleRole.PARENT;
+                            }
+                        }
                         case SCENE: return Scene.this;
                         case FOCUS_NODE: {
                             if (transientFocusContainer != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -1299,6 +1299,7 @@ final class MacAccessible extends Accessible {
                         case PAGE_ITEM: result = "page"; break;
                         case TAB_ITEM: result = "tab"; break;
                         case LIST_VIEW: result = "list"; break;
+                        case DIALOG: result = "dialog"; break;
                         default:
                             MacRole macRole = getRole(role);
                             MacSubrole subRole = MacSubrole.getRole(role);
