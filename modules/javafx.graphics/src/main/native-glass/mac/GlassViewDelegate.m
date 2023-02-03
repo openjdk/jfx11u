@@ -264,7 +264,9 @@ static jint getSwipeDirFromEvent(NSEvent *theEvent)
     (*env)->CallVoidMethod(env, self->jView, jViewNotifyResize, (int)newSize.width, (int)newSize.height);
     GLASS_CHECK_EXCEPTION(env);
 
-    [self->nsView removeTrackingRect:self->trackingRect];
+    if (self->trackingRect) {
+        [self->nsView removeTrackingRect:self->trackingRect];
+    }
     self->trackingRect = [self->nsView addTrackingRect:[self->nsView bounds] owner:self->nsView userData:nil assumeInside:NO];
 }
 
@@ -278,13 +280,17 @@ static jint getSwipeDirFromEvent(NSEvent *theEvent)
     (*env)->CallVoidMethod(env, self->jView, jViewNotifyResize, (int)frameRect.size.width, (int)frameRect.size.height);
     GLASS_CHECK_EXCEPTION(env);
 
-    [self->nsView removeTrackingRect:self->trackingRect];
+    if (self->trackingRect) {
+        [self->nsView removeTrackingRect:self->trackingRect];
+    }
     self->trackingRect = [self->nsView addTrackingRect:[self->nsView bounds] owner:self->nsView userData:nil assumeInside:NO];
 }
 
 - (void)updateTrackingAreas
 {
-    [self->nsView removeTrackingRect:self->trackingRect];
+    if (self->trackingRect) {
+        [self->nsView removeTrackingRect:self->trackingRect];
+    }
     self->trackingRect = [self->nsView addTrackingRect:[self->nsView bounds] owner:self->nsView userData:nil assumeInside:NO];
 }
 
